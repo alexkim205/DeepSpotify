@@ -1,18 +1,8 @@
-#!/usr/bin/env python
-
-'''
-Author:     Alex Kim, Justin Salamon
-Project:    MeloSynth / (used in) DeepMelodies
-Purpose:    synthesize a melody
-
-Borrowed heavily from Justin Salamon's [Melosynth](https://github.com/justinsalamon/melosynth) to be used as a module.
-
-'''
-
-import os, wave, logging, glob
+import os, wave, logging
 import numpy as np
+import scipy.io.wavfile
+import librosa
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
-
 
 def wavwrite(x, filename, fs=44100, N=16):
     '''
@@ -32,27 +22,14 @@ def wavwrite(x, filename, fs=44100, N=16):
     - N : int
     Bit depth, by default 16.
     '''
-
+    
     maxVol = 2**15-1.0 # maximum amplitude
     x = x * maxVol # scale x
-    # convert x to string format expected by wave
-    print(x)
-    signal = "".join((wave.struct.pack('h', item) for item in x))
-    print("".join((wave.struct.pack('h', item) for item in x)))
-    print(signal)
-    wv = wave.open(filename, 'w')
-    nchannels = 1
-    sampwidth = N / 8 # in bytes
-    framerate = fs
-    nframe = 0 # no limit
-    comptype = 'NONE'
-    compname = 'not compressed'
-    wv.setparams((nchannels, sampwidth, framerate, nframe, comptype, compname))
-    wv.writeframes(signal)
-    wv.close()
+    
+    scipy.io.wavfile.write(filename, fs, np.asarray(x, dtype=np.int16))
+    
 
-
-def melosynth(times, freqs, outputid, fs, nHarmonics, square, useneg):
+def melosynth(times, freqs, orig_freqs, outputfolder, outputid, fs, nHarmonics, square, useneg):
     '''
     Load pitch sequence from  a txt/csv file and synthesize it into a .wav
 
@@ -62,10 +39,17 @@ def melosynth(times, freqs, outputid, fs, nHarmonics, square, useneg):
 
     - freqs: np.ndarray
     Array of corresponding frequency values (float)
+    
+    - orig_url: str
+    URL string of the original song. Used to write to 
+    [outputid].melosynth.mix.wav
+
+
+    - outputfolder: str
+    Path to where output csv and wav files should be saved.
 
     - outputid: str
-    Spotify track URI. [track_uri].csv and [track_uri]_melosynth.wav will be 
-    written.
+    [outputid].csv and [outputid].melosynth.wav will be written.
 
     - fs : int
     Sampling frequency for the synthesized file.
@@ -165,10 +149,22 @@ def melosynth(times, freqs, outputid, fs, nHarmonics, square, useneg):
     signal *= 0.8 / float(np.max(signal))
 
     logging.info('Saving csv file...')
-    csv_data = np.asarray([times, freqs])
-    csv_f = outputid + ".csv"
+    # music/data/melodia/data
+    csv_data = np.array([times, freqs]).T
+    csv_f = os.path.join(outputfolder, "data", outputid + ".csv")
     np.savetxt(csv_f, csv_data, delimiter=",")
     
     logging.info('Saving wav file...')
-    wav_f = outputid + "_melosynth.wav"
+    # music/data/melodia/synths
+    wav_f = os.path.join(outputfolder, "synths", outputid + ".melosynth.wav")
     wavwrite(np.asarray(signal), wav_f, fs)
+    
+    logging.info('Saving mixed wav file...')
+    # music/data/melodia/synths
+    wav_mix_f = os.path.join(outputfolder, "synths", outputid + ".melosynth.mix.wav")
+    
+    # cut off last second to keep both arrays same size
+    orig, sr = librosa.load(orig_url, sr=44100, mono=True, duration=29, offset=0.05)
+    melo, sr = librosa.load(wav_f, sr=44100, mono=True, duration=29)
+    orig_and_melo = np.add(orig*0.3, melo*0.7)
+    librosa.output.write_wav(wav_mix_f, orig_and_melo, sr)
