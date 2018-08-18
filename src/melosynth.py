@@ -1,3 +1,14 @@
+#!/usr/bin/env python
+
+'''
+Author:     Alex Kim, Justin Salamon
+Project:    MeloSynth / (used in) DeepMelodies
+Purpose:    synthesize a melody
+
+Borrowed heavily from Justin Salamon's [Melosynth](https://github.com/justinsalamon/melosynth) to be used as a module.
+
+'''
+
 import os, wave, logging
 import numpy as np
 import scipy.io.wavfile
