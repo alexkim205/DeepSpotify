@@ -7,8 +7,8 @@ File:       src/melosynth.py
 Purpose:    synthesize a melody
 
 Borrowed heavily from combination of Justin Salamon's 
-* [Melosynth](https://github.com/justinsalamon/melosynth)
-* [audio_to_midi_melodia](https://github.com/justinsalamon/audio_to_midi_melodia)
+    * [Melosynth](https://github.com/justinsalamon/melosynth)
+    * [audio_to_midi_melodia](https://github.com/justinsalamon/audio_to_midi_melodia)
 
 '''
 
@@ -18,8 +18,6 @@ import scipy.io.wavfile
 from scipy.signal import medfilt
 from midiutil.MidiFile import MIDIFile
 import librosa
-
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
 
 
 def createMelody(_times, _freqs, _bpm, _orig_url, _outputfolder, _outputid):

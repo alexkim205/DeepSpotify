@@ -7,7 +7,7 @@ File:       src/meloextract.py
 Purpose:    extract a melody
 
 Borrowed heavily from Justin Salamon's 
-* [Melodia Jupyter Notebook](http://www.justinsalamon.com/news/melody-extraction-in-python-with-melodia)
+    * [Melodia Jupyter Notebook](http://www.justinsalamon.com/news/melody-extraction-in-python-with-melodia)
 
 '''
 

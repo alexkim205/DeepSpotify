@@ -13,8 +13,6 @@ import sys, os, logging
 import spotipy
 import spotipy.oauth2 as oauth2
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.INFO)
-
 
 def authenticateSpotify(keyfile):
     
