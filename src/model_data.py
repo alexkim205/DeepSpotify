@@ -1,0 +1,110 @@
+import logging
+from keras.utils import to_categorical
+from melosynth import createMelody
+from meloextract import extractMelody
+from midiparse import getGrammars, getCorpusData
+
+def parseOneSong(sp, song, media_output_dir, fs=44100, hop=128):
+
+    # Get name, uri, preview_url
+    track = song['track']
+    name = ''.join(e for e in track['name'] if e.isalnum())
+    track_uri = track['uri'].split(':')[2]
+    preview_url = track['preview_url']
+
+    logging.info("Analyzing Spotify audio...")
+    analysis = sp.audio_analysis(track_uri)
+    bpm = analysis['track']['tempo']
+    
+    # Extract and Write Melodies
+    timestamps, melodyfreqs, orig_url = extractMelody(preview_url, fs, hop)
+    csv_f, wav_f, wav_mix_f, wav_orig_f, midi_f = createMelody(timestamps, melodyfreqs, bpm, orig_url, media_output_dir, name)
+    
+    # Parse Midi to get Grammars
+    logging.info("Extracting MIDI grammars...")
+    grammar = getGrammars(midi_f)
+    corpus, values = getCorpusData(grammar)
+    
+    return(corpus, values)
+
+def hasPreview(song):
+    return (song['track']['preview_url'] is not None)
+
+def getModelData(sp, songs, media_output_dir, fs, hop):
+    '''
+    split song data into three sets of corpuses: training, validation, and testing data
+    Ratio is train:validate:test = (n-2):1:1
+    '''
+
+    # Filter only songs with available previews
+    print([hasPreview(s) for s in songs])
+    songs = [s for s in songs if hasPreview(s)]
+
+    training_songs = songs[:-2]
+    validating_song = songs[-2]
+    testing_song = songs[-1]
+    print(len(training_songs))
+    print("-----")
+    print(validating_song['track']['name'])
+    print("-----")
+    print(testing_song['track']['name'])
+    print("-----")
+
+    # Get corpus data for testing songs
+    test_data = parseOneSong(sp, validating_song, media_output_dir, fs, hop)[0]
+
+    # Get corpus data for validating songs
+    valid_data = parseOneSong(sp, testing_song, media_output_dir, fs, hop)[0]
+
+    # Get corpus data for training songs
+    list_of_train_data = []
+    values = []
+
+    for training_song in training_songs:
+        train_corpus, train_values = parseOneSong(sp, training_song, media_output_dir, fs, hop)
+        list_of_train_data.append(train_corpus)
+        values.extend(train_values)
+    
+    values = sorted(list(set(values)))
+    val_indices = dict((v, i) for i, v in enumerate(values))
+    indices_val = dict((i, v) for i, v in enumerate(values))
+    
+    return (list_of_train_data, valid_data, test_data, values, val_indices, indices_val)
+
+
+class KerasBatchGenerator(object):
+    
+    def __init__(self, data, num_steps, batch_size, vocabulary, skip_step=5):
+        self.data = data
+        self.num_steps = num_steps
+        self.batch_size = batch_size
+        self.vocabulary = vocabulary
+        # this will track the progress of the batches sequentially through the
+        # data set - once the data reaches the end of the data set it will reset
+        # back to zero
+        self.current_idx = 0
+        # skip_step is the number of words which will be skipped before the next
+        # batch is skimmed from the data set
+        self.skip_step = skip_step
+
+    def generate(self):
+        x = np.zeros((self.batch_size, self.num_steps))
+        y = np.zeros((self.batch_size, self.num_steps, self.vocabulary))
+        while True:
+            for i in range(self.batch_size):
+                if self.current_idx + self.num_steps >= len(self.data):
+                    # reset the index back to the start of the data set
+                    self.current_idx = 0
+                x[i, :] = self.data[self.current_idx:self.current_idx + self.num_steps]
+                temp_y = self.data[self.current_idx + 1:self.current_idx + self.num_steps + 1]
+                # convert all of temp_y into a one hot representation
+                y[i, :, :] = to_categorical(temp_y, num_classes=self.vocabulary)
+                self.current_idx += self.skip_step
+            yield x, y
+
+# num_steps = 30 # timesteps
+# batch_size = 20 # number of samples
+# train_data_generator = KerasBatchGenerator(train_data, num_steps, batch_size, vocabulary,
+#                                            skip_step=num_steps)
+# valid_data_generator = KerasBatchGenerator(valid_data, num_steps, batch_size, vocabulary,
+#                                            skip_step=num_steps)

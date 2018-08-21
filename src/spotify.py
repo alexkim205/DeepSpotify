@@ -34,7 +34,7 @@ def authenticateSpotify(keyfile):
     return(sp)
 
 
-def getSpotifyData(sp, uri):
+def getSpotifyData(sp, uri, n_songs):
 
     # Extract info from URI and request
     username = uri.split(':')[2]
@@ -42,5 +42,5 @@ def getSpotifyData(sp, uri):
     results = sp.user_playlist(username, playlist_id)
     songs = results['tracks']['items']
 
-    return(songs)
+    return(songs[:n_songs])
 

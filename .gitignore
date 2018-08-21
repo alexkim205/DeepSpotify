@@ -3,3 +3,4 @@ notebooks/.ipynb_checkpoints
 *__pycache__*
 data/melodia
 .vscode
+music.code-workspace

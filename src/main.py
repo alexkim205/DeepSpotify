@@ -8,52 +8,45 @@ Purpose:    main script
 
 '''
 
+from __future__ import print_function
 import logging
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 
 from spotify import authenticateSpotify, getSpotifyData
-from melosynth import createMelody
-from meloextract import extractMelody
-from midiparse import getGrammars, getCorpusData
-
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+from model_data import getModelData
+from lstm import createModel
 
 def main():
 
-    # define analysis parameters
+    # Define model parameters
+    n_epochs = 1
+    n_songs = 10 # >= 3 ; train:validate:test = (n-2):1:1
+    batch_size = 40 
+
+    # Define analysis parameters
     fs = 44100
     hop = 128
 
     media_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/melodia"
     key_f = "/Users/alexkim/Dropbox/Developer/ML/music/keys.cfg"
-    spot_uri = "spotify:user:myplay.com:playlist:2f6tXtN0XesjONxicAzMIw"
+    spot_uri = "spotify:user:jeraldpgambino:playlist:6RzO3F2uNKdbRif0Fxo8Fn"
 
     sp = authenticateSpotify(key_f)
-    songs = getSpotifyData(sp, spot_uri)
+    songs = getSpotifyData(sp, spot_uri, n_songs)
+    list_of_train_data, valid_data, test_data, values, val_indices, indices_val = \
+        getModelData(sp, songs, media_output_dir, fs, hop)
 
-    for song in songs[:2]:
-        
-        # Get name, uri, preview_url
-        track = song['track']
-        name = ''.join(e for e in track['name'] if e.isalnum())
-        track_uri = track['uri'].split(':')[2]
-        preview_url = track['preview_url']
+    print(list_of_train_data)
+    
+    model = None
 
-        logging.info("Analyzing Spotify audio...")
-        analysis = sp.audio_analysis(track_uri)
-        bpm = analysis['track']['tempo']
-        
-        # If preview url is unavailable, skip song
-        if (preview_url == None): continue
-        
-        # Extract and Write Melodies
-        timestamps, melodyfreqs, orig_url = extractMelody(preview_url, fs, hop)
-        csv_f, wav_f, wav_mix_f, wav_orig_f, midi_f = createMelody(timestamps, melodyfreqs, bpm, orig_url, media_output_dir, name)
-        
-        # Parse Midi to get Grammars
-        logging.info("Extracting MIDI grammars...")
-        grammar = getGrammars(midi_f)
-        corpus, values, val_indices, indices_val = getCorpusData(grammar)
-        print(values)
+    '''
+    # Building Model
+    logging.info("Building model...")
+    m = createModel(corpus, values, val_indices, indices_val, batch_size, n_epochs)
+    print(m.summary())
+    '''
+                
 
 if __name__ == "__main__":
     
