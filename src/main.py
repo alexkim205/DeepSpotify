@@ -20,10 +20,10 @@ def main():
 
     # Define model parameters
     n_epochs = 128
-    n_songs = 3 # >= 3 ; train:validate:test = (n-2):1:1; last song will be test
-    n_steps = 40 # number of timesteps in memory
+    n_songs = 20 # >= 3 ; train:validate:test = (n-2):1:1; last song will be test
+    n_steps = 20 # number of timesteps in memory
     batch_size = 4
-    skip_step = 3
+    skip_step = 1
     hidden_size = 128
     use_dropout = True
 
@@ -48,7 +48,7 @@ def main():
 
     # Build model
     model, checkpointer = createModel(len(values), n_steps, hidden_size, use_dropout, model_output_dir)
-    print(model.summary())
+    # print(model.summary())
 
     # Prepare batch generators and train
     logging.info("Prepare batch generators...")

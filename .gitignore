@@ -2,5 +2,6 @@ keys.cfg
 notebooks/.ipynb_checkpoints
 *__pycache__*
 data/melodia
+data/model
 .vscode
 music.code-workspace
