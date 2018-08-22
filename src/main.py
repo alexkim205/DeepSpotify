@@ -19,10 +19,10 @@ from lstm import createModel
 def main():
 
     # Define model parameters
-    n_epochs = 50
+    n_epochs = 128
     n_songs = 3 # >= 3 ; train:validate:test = (n-2):1:1; last song will be test
-    n_steps = 30 # number of timesteps in memory
-    batch_size = 2
+    n_steps = 40 # number of timesteps in memory
+    batch_size = 4
     skip_step = 3
     hidden_size = 128
     use_dropout = True
@@ -50,17 +50,14 @@ def main():
     model, checkpointer = createModel(len(values), n_steps, hidden_size, use_dropout, model_output_dir)
     print(model.summary())
 
-    print(valid_data)
-    print(len(valid_data))
-
     # Prepare batch generators and train
     logging.info("Prepare batch generators...")
-    valid_data_generator = KerasBatchGenerator(valid_data, n_steps, batch_size, len(values), skip_step=skip_step)
+    valid_data_generator = KerasBatchGenerator(valid_data, val_indices, n_steps, batch_size, len(values), skip_step=skip_step)
     #test_data_generator = KerasBatchGenerator(valid_data, n_steps, batch_size(valid_data), len(values), skip_step=skip_step)
 
     for i, train_data in enumerate(list_of_train_data):
         # Generate train data
-        train_data_generator = KerasBatchGenerator(train_data, n_steps, batch_size, len(values), skip_step=skip_step)
+        train_data_generator = KerasBatchGenerator(train_data, val_indices, n_steps, batch_size, len(values), skip_step=skip_step)
         # Train model
         model.fit_generator(train_data_generator.generate(), len(train_data)//(batch_size*n_steps), n_epochs,
                             validation_data=valid_data_generator.generate(),

@@ -56,8 +56,5 @@ def getCorpusData(fullGrammar):
 
     corpus = fullGrammar.split(' ')
     values = sorted(list(set(corpus)))
-    #print("Length of corpus: %d\nLength of dict: %d" % (len(corpus), len(values)))
-    #val_indices = dict((v, i) for i, v in enumerate(values))
-    #indices_val = dict((i, v) for i, v in enumerate(values))
 
     return(corpus, values)

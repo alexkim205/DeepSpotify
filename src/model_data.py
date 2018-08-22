@@ -48,22 +48,25 @@ def getModelData(sp, songs, media_output_dir, fs, hop):
     '''
 
     # Filter only songs with available previews
-    print([hasPreview(s) for s in songs])
     songs = [s for s in songs if hasPreview(s)]
 
     training_songs = songs[:-2]
     validating_song = songs[-2]
     testing_song = songs[-1]
 
+    # Gather unique values from all sets of data
+    values = []
+
     # Get corpus data for testing songs
-    test_data = parseOneSong(sp, validating_song, media_output_dir, fs, hop)[0]
+    test_data, test_values = parseOneSong(sp, validating_song, media_output_dir, fs, hop)
+    values.extend(test_values)
 
     # Get corpus data for validating songs
-    valid_data = parseOneSong(sp, testing_song, media_output_dir, fs, hop)[0]
+    valid_data, valid_values = parseOneSong(sp, testing_song, media_output_dir, fs, hop)
+    values.extend(valid_values)
 
     # Get corpus data for training songs
     list_of_train_data = []
-    values = []
 
     for training_song in training_songs:
         train_corpus, train_values = parseOneSong(sp, training_song, media_output_dir, fs, hop)
@@ -79,8 +82,9 @@ def getModelData(sp, songs, media_output_dir, fs, hop):
 
 class KerasBatchGenerator(object):
     
-    def __init__(self, data, num_steps, batch_size, vocabulary, skip_step=5):
+    def __init__(self, data, val_indices, num_steps, batch_size, vocabulary, skip_step=5):
         self.data = data
+        self.val_indices = val_indices
         self.num_steps = num_steps
         self.batch_size = batch_size
         self.vocabulary = vocabulary
@@ -100,15 +104,26 @@ class KerasBatchGenerator(object):
                 if self.current_idx + self.num_steps >= len(self.data):
                     # reset the index back to the start of the data set
                     self.current_idx = 0
-                x[i, :] = self.data[self.current_idx:self.current_idx + self.num_steps]
-                temp_y = self.data[self.current_idx + 1:self.current_idx + self.num_steps + 1]
+                x[i, :] = [self.val_indices[e] for e in self.data[self.current_idx:self.current_idx + self.num_steps]]
+                temp_y = [self.val_indices[e] for e in self.data[self.current_idx + 1:self.current_idx + self.num_steps + 1]]
                 # convert all of temp_y into a one hot representation
                 y[i, :, :] = to_categorical(temp_y, num_classes=self.vocabulary)
                 self.current_idx += self.skip_step
 
-            print("x shape: ")
-            print(x.shape)
-            print("y shape: ")
-            print(y.shape)
+            # print("x shape: ")
+            # print(x.shape)
+            # print("y shape: ")
+            # print(y.shape)
 
             yield(x, y)
+
+'''
+    # Define model parameters
+    n_epochs = 50
+    n_songs = 3 # >= 3 ; train:validate:test = (n-2):1:1; last song will be test
+    n_steps = 30 # number of timesteps in memory
+    batch_size = 2
+    skip_step = 3
+    hidden_size = 128
+    use_dropout = True
+'''

@@ -19,7 +19,6 @@ def authenticateSpotify(keyfile):
     # Parse for Spotify API Tokens
     config = configparser.ConfigParser()
     config.read(keyfile)
-    print(keyfile)
     client_id = config.get('SPOTIFY', 'CLIENT_ID')
     client_secret = config.get('SPOTIFY', 'CLIENT_SECRET')
 
