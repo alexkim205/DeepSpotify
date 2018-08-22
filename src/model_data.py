@@ -1,4 +1,15 @@
+#!/usr/bin/env python
+
+'''
+Author:     Alex Kim
+Project:    DeepMelodies
+File:       src/model_data.py
+Purpose:    get model data (train, validate, test data)
+
+'''
+
 import logging
+import numpy as np
 from keras.utils import to_categorical
 from melosynth import createMelody
 from meloextract import extractMelody
@@ -43,12 +54,6 @@ def getModelData(sp, songs, media_output_dir, fs, hop):
     training_songs = songs[:-2]
     validating_song = songs[-2]
     testing_song = songs[-1]
-    print(len(training_songs))
-    print("-----")
-    print(validating_song['track']['name'])
-    print("-----")
-    print(testing_song['track']['name'])
-    print("-----")
 
     # Get corpus data for testing songs
     test_data = parseOneSong(sp, validating_song, media_output_dir, fs, hop)[0]
@@ -100,11 +105,10 @@ class KerasBatchGenerator(object):
                 # convert all of temp_y into a one hot representation
                 y[i, :, :] = to_categorical(temp_y, num_classes=self.vocabulary)
                 self.current_idx += self.skip_step
-            yield x, y
 
-# num_steps = 30 # timesteps
-# batch_size = 20 # number of samples
-# train_data_generator = KerasBatchGenerator(train_data, num_steps, batch_size, vocabulary,
-#                                            skip_step=num_steps)
-# valid_data_generator = KerasBatchGenerator(valid_data, num_steps, batch_size, vocabulary,
-#                                            skip_step=num_steps)
+            print("x shape: ")
+            print(x.shape)
+            print("y shape: ")
+            print(y.shape)
+
+            yield(x, y)
