@@ -53,6 +53,7 @@ def getGrammars(midi_f):
 
     return(fullGrammar.rstrip())
 
+
 def interpretGrammar(grammar):
     
     split_grammar = grammar.split(',')
@@ -62,10 +63,11 @@ def interpretGrammar(grammar):
 
     if element_type == 'R':
         # Rest
-        return (duration, note.Rest())
+        return (float(duration), note.Rest())
     elif element_type == 'N':
         # Note
-        return (duration, note.Note(pitch))
+        return (float(duration), note.Note(pitch))
+
 
 def getCorpusData(fullGrammar):
 

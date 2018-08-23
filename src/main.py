@@ -9,9 +9,10 @@ Purpose:    main script
 '''
 
 from __future__ import print_function
-import logging, argparse
+import logging, argparse, os
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 from keras.models import load_model
+from music21 import stream, tempo, midi
 
 from spotify import authenticateSpotify, getSpotifyData
 from model_data import getModelData, KerasBatchGenerator
@@ -32,7 +33,7 @@ def main(run_opt):
 
     # Define generate parameters
     # TODO - n_batch_prime = 1 # number of batches in test data to begin predicting with
-    n_predict = 30
+    n_predict = 500
 
     # Define analysis parameters
     fs = 44100
@@ -40,6 +41,8 @@ def main(run_opt):
 
     media_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/melodia"
     model_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/model"
+    newsynth_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/new_synth"
+    newsynth_f = "Queen.mid"
     key_f = "/Users/alexkim/Dropbox/Developer/ML/music/keys.cfg"
     spot_uri = "spotify:user:jeraldpgambino:playlist:6RzO3F2uNKdbRif0Fxo8Fn"
 
@@ -72,10 +75,7 @@ def main(run_opt):
             # Generate train data
             train_data_generator = KerasBatchGenerator(train_data, val_indices, n_steps, batch_size, len(values), skip_step=skip_step)
             # Train model
-            print("len(train_data) - %d" % len(train_data))
-            print("batch_size - %d" % batch_size)
-            print("n_steps - %d" % n_steps)
-            print("steps - %d" % (len(train_data)//(batch_size*n_steps)))
+            logging.info("Training model[%d/%d]..." % (i, len(list_of_train_data)))
             model.fit_generator(train_data_generator.generate(), len(train_data)//(batch_size*n_steps), n_epochs,
                                 validation_data=valid_data_generator.generate(),
                                 validation_steps=len(valid_data)//(batch_size*n_steps), callbacks=[checkpointer])
@@ -84,11 +84,13 @@ def main(run_opt):
     if run_opt in [3, 4]:
 
         # Load the latest model; TODO load the *best* model
+        logging.info("Loading best model...")
         model = load_model("%s/model-%d.hdf5" % (model_output_dir, n_epochs))
         dummy_iters = n_epochs
         example_test_generator = KerasBatchGenerator(test_data, val_indices, n_steps, batch_size, len(values), skip_step=skip_step)
 
         # Obtain true grammars and predicted grammars
+        logging.info("Predicting grammars...")
         true_grammars, predicted_grammars = generate(model, test_data, example_test_generator, indices_val, \
             n_steps, n_predict, dummy_iters)
         
@@ -99,6 +101,7 @@ def main(run_opt):
         print(predicted_grammars)
 
         # Set up audio stream
+        logging.info("Writing generated melody to MIDI...")
         true_stream = stream.Stream()
         predicted_stream = stream.Stream()
 
@@ -116,6 +119,14 @@ def main(run_opt):
             duration, element = interpretGrammar(g)
             predicted_stream.insert(curr_offset, element)
             curr_offset += duration
+        
+        # Save stream
+        mf = midi.translate.streamToMidiFile(predicted_stream)
+        newsynth_fo = os.path.join(newsynth_output_dir, newsynth_f)
+        mf.open(newsynth_fo, 'wb')
+        mf.write()
+        mf.close()
+
 
 if __name__ == "__main__":
     

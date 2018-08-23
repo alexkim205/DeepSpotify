@@ -3,5 +3,6 @@ notebooks/.ipynb_checkpoints
 *__pycache__*
 data/melodia
 data/model
+data/new_synth
 .vscode
 music.code-workspace
