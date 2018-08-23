@@ -47,7 +47,7 @@ def getGrammars(midi_f):
             pitch_name = n.pitch.name
             pitch_octave = n.pitch.octave
 
-        note_info = "%s,%s%s,%.3f" % (element_type, pitch_name, pitch_octave, offset)
+        note_info = "%s,%s%s,%.3f" % (element_type, pitch_name, pitch_octave, duration)
 
         fullGrammar += (note_info + ' ')
 
@@ -58,14 +58,14 @@ def interpretGrammar(grammar):
     split_grammar = grammar.split(',')
     element_type = split_grammar[0]
     pitch = split_grammar[1]
-    offset = split_grammar[2]
+    duration = split_grammar[2]
 
     if element_type == 'R':
         # Rest
-        return (offset, note.Rest())
+        return (duration, note.Rest())
     elif element_type == 'N':
         # Note
-        return (offset, note.Note(pitch))
+        return (duration, note.Note(pitch))
 
 def getCorpusData(fullGrammar):
 

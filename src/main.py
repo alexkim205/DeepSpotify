@@ -104,15 +104,18 @@ def main(run_opt):
 
         true_stream.insert(0.0, tempo.MetronomeMark(number=test_bpm))
         predicted_stream.insert(0.0, tempo.MetronomeMark(number=test_bpm))
+
         curr_offset = 0
-
         for g in true_grammars:
-            offset, element = interpretGrammar(g)
-            true_stream.insert(curr_offset + offset, element)
+            duration, element = interpretGrammar(g)
+            true_stream.insert(curr_offset, element)
+            curr_offset += duration
 
+        curr_offset = 0
         for g in predicted_grammars:
-            offset, element = interpretGrammar(g)
-            predicted_stream.insert(curr_offset + offset, element)
+            duration, element = interpretGrammar(g)
+            predicted_stream.insert(curr_offset, element)
+            curr_offset += duration
 
 if __name__ == "__main__":
     
