@@ -115,11 +115,6 @@ class KerasBatchGenerator(object):
                 y[i, :, :] = to_categorical(temp_y, num_classes=self.vocabulary)
                 self.current_idx += self.skip_step
 
-            # print("x shape: ")
-            # print(x.shape)
-            # print("y shape: ")
-            # print(y.shape)
-
             yield(x, y)
 
 '''

@@ -38,7 +38,7 @@ def getSpotifyData(sp, uri, n_songs):
     # Extract info from URI and request
     username = uri.split(':')[2]
     playlist_id = uri.split(':')[4]
-    results = sp.user_playlist(username, playlist_id)
+    results = sp.user_playlist(username, playlist_id) # doesn't work if not user playlist
     songs = results['tracks']['items']
 
     return(songs[:n_songs])

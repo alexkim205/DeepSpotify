@@ -20,10 +20,16 @@ def generate(model, test_data, example_test_generator, indices_val, n_steps, n_p
         prediction = model.predict(data[0])
         predicted_grammar = np.argmax(prediction[:, n_steps - 1, :])
 
-        true_list.append(test_data[n_steps + dummy_iters + i])
-        pred_list.append(indices_val[predicted_grammar])
-    
-    print(true_list)
-    print(pred_list)
+        if i == 0: # Add first few notes
+            true_list.extend([indices_val[i] for i in data[0][0]]) 
+            pred_list.extend([indices_val[i] for i in data[0][0]])
+        else:
+            true_list.append(indices_val[data[0][0][-1]])
+            # If prediction not in vocabulary, subtract to adjust for >1 batches
+            while predicted_grammar not in indices_val: 
+                # print("shape: %d, predicted: %d" % (prediction.shape[2], predicted_grammar))
+                predicted_grammar -= prediction.shape[2]
+                
+            pred_list.append(indices_val[predicted_grammar])
 
-    return(true_listpred_list)
+    return(true_list, pred_list)

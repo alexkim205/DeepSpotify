@@ -12,7 +12,7 @@ Corpus data preparation inspired by public examples from the Keras Github.
 
 '''
 
-from music21 import converter, note
+from music21 import converter, note, stream
 import copy
 
 
@@ -30,7 +30,8 @@ def getGrammars(midi_f):
 
     for i, n in enumerate(midi_clean):
 
-        note_duration = float(n.duration.quarterLength)
+        duration = float(n.duration.quarterLength)
+        offset = float(n.offset)
 
         # Check Element, Pitch Name, Pitch Octave ~ for now, only check if Rest or Note
         element_type = ' '
@@ -46,11 +47,25 @@ def getGrammars(midi_f):
             pitch_name = n.pitch.name
             pitch_octave = n.pitch.octave
 
-        note_info = "%s,%s%s,%.3f" % (element_type, pitch_name, pitch_octave, note_duration)
+        note_info = "%s,%s%s,%.3f" % (element_type, pitch_name, pitch_octave, offset)
 
         fullGrammar += (note_info + ' ')
 
     return(fullGrammar.rstrip())
+
+def interpretGrammar(grammar):
+    
+    split_grammar = grammar.split(',')
+    element_type = split_grammar[0]
+    pitch = split_grammar[1]
+    offset = split_grammar[2]
+
+    if element_type == 'R':
+        # Rest
+        return (offset, note.Rest())
+    elif element_type == 'N':
+        # Note
+        return (offset, note.Note(pitch))
 
 def getCorpusData(fullGrammar):
 
