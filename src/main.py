@@ -16,6 +16,7 @@ from keras.models import load_model
 from spotify import authenticateSpotify, getSpotifyData
 from model_data import getModelData, KerasBatchGenerator
 from lstm import createModel
+from generate import generate
 
 def main(run_opt):
 
@@ -27,6 +28,9 @@ def main(run_opt):
     skip_step = 1
     hidden_size = 128
     use_dropout = True
+
+    # Define generate parameters
+    n_predict = 10
 
     # Define analysis parameters
     fs = 44100
@@ -77,24 +81,11 @@ def main(run_opt):
     # Generate new audio
     if run_opt in [3, 4]:
 
-        model = load_model("%s\model-%d.hdf5" % (model_output_dir, n_epochs))
+        model = load_model("%s/model-%d.hdf5" % (model_output_dir, n_epochs))
         dummy_iters = n_epochs
         example_test_generator = KerasBatchGenerator(test_data, val_indices, n_steps, batch_size, len(values), skip_step=skip_step)
 
-        for i in range(dummy_iters):
-            dummy = next(example_test_generator.generate())
-        
-        n_predict = 10
-        true_print_out = ""
-        pred_print_out = "Predicted grammar: "
-        for i in range(n_predict):
-            data = next(example_test_generator.generate())
-            prediction = model.predict(data[0])
-            predicted_grammar = np.argmax(prediction[:, n_steps - 1, :])
-            true_print_out += indices_val[test_data[n_steps + dummy_iters + i]] + " "
-            pred_print_out += indices_val[predicted_grammar] + " "
-        print(true_print_out)
-        print(pred_print_out)
+        predicted_grammars = generate(model, test_data, example_test_generator, indices_val, n_steps, n_predict, dummy_iters)
 
 
 if __name__ == "__main__":
@@ -104,5 +95,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(args.run_opt)
-
-    # TODO get arguments working so that you don't have to recreate music files all over again for each run
