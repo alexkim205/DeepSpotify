@@ -8,14 +8,14 @@ Purpose:    get model data (train, validate, test data)
 
 '''
 
-import logging
+import logging, os
 import numpy as np
 from keras.utils import to_categorical
 from melosynth import createMelody
 from meloextract import extractMelody
 from midiparse import getGrammars, getCorpusData
 
-def parseOneSong(sp, song, media_output_dir, fs=44100, hop=128):
+def parseOneSong(sp, song, media_output_dir, fs=44100, hop=128, run_opt=4):
 
     # Get name, uri, preview_url
     track = song['track']
@@ -23,14 +23,19 @@ def parseOneSong(sp, song, media_output_dir, fs=44100, hop=128):
     track_uri = track['uri'].split(':')[2]
     preview_url = track['preview_url']
 
-    logging.info("Analyzing Spotify audio...")
+    if (run_opt in [1, 4]): logging.info("Analyzing Spotify audio...")
     analysis = sp.audio_analysis(track_uri)
     bpm = analysis['track']['tempo']
-    
-    # Extract and Write Melodies
-    timestamps, melodyfreqs, orig_url = extractMelody(preview_url, fs, hop)
-    csv_f, wav_f, wav_mix_f, wav_orig_f, midi_f = createMelody(timestamps, melodyfreqs, bpm, orig_url, media_output_dir, name)
-    
+
+    midi_f = None
+    if (run_opt in [1, 4]):
+        # Extract and Write Melodies
+        timestamps, melodyfreqs, orig_url = extractMelody(preview_url, fs, hop)
+        csv_f, wav_f, wav_mix_f, wav_orig_f, midi_f = createMelody(timestamps, melodyfreqs, bpm, orig_url, media_output_dir, name)
+    elif (run_opt in [2, 3]):
+        # No need to write melodies to any files, just provide filename
+        midi_f = os.path.join(media_output_dir, "synths", name + ".melo.midi")
+        
     # Parse Midi to get Grammars
     logging.info("Extracting MIDI grammars...")
     grammar = getGrammars(midi_f)
@@ -41,7 +46,7 @@ def parseOneSong(sp, song, media_output_dir, fs=44100, hop=128):
 def hasPreview(song):
     return (song['track']['preview_url'] is not None)
 
-def getModelData(sp, songs, media_output_dir, fs, hop):
+def getModelData(sp, songs, media_output_dir, fs, hop, run_opt=4):
     '''
     split song data into three sets of corpuses: training, validation, and testing data
     Ratio is train:validate:test = (n-2):1:1
@@ -58,18 +63,18 @@ def getModelData(sp, songs, media_output_dir, fs, hop):
     values = []
 
     # Get corpus data for testing songs
-    test_data, test_values = parseOneSong(sp, validating_song, media_output_dir, fs, hop)
+    test_data, test_values = parseOneSong(sp, validating_song, media_output_dir, fs, hop, run_opt)
     values.extend(test_values)
 
     # Get corpus data for validating songs
-    valid_data, valid_values = parseOneSong(sp, testing_song, media_output_dir, fs, hop)
+    valid_data, valid_values = parseOneSong(sp, testing_song, media_output_dir, fs, hop, run_opt)
     values.extend(valid_values)
 
     # Get corpus data for training songs
     list_of_train_data = []
 
     for training_song in training_songs:
-        train_corpus, train_values = parseOneSong(sp, training_song, media_output_dir, fs, hop)
+        train_corpus, train_values = parseOneSong(sp, training_song, media_output_dir, fs, hop, run_opt)
         list_of_train_data.append(train_corpus)
         values.extend(train_values)
     
