@@ -22,11 +22,11 @@ from generate import generate, generatePlots
 from midiparse import interpretGrammar
 from melosynth import midiwrite
 
-def main(run_opt):
+def main(args):
 
     # Define model parameters
     n_epochs = 150
-    n_songs = 6 # >= 3 ; train:validate:test = (n-2):1:1; last song will be test
+    n_songs = 10 # >= 3 ; train:validate:test = (n-2):1:1; last song will be test
     n_steps = 5 # number of timesteps in memory
     batch_size = 2
     skip_step = 1
@@ -46,7 +46,7 @@ def main(run_opt):
     stat_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/stat"
     newsynth_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/new_synth"
     key_f = "/Users/alexkim/Dropbox/Developer/ML/music/keys.cfg"
-    spot_uri = "spotify:user:alezabeth1997:playlist:0BLcVU3U6X2QkhxcYl2Ai1"
+    spot_uri = args.uri # spotify:user:alezabeth1997:playlist:0BLcVU3U6X2QkhxcYl2Ai1
 
     # Get Spotify songs
     logging.info("Getting songs...")
@@ -56,12 +56,12 @@ def main(run_opt):
     ## An integer: 1 to analyze audio, 2 to train, 3 to generate, 4 to do everything.
     
     # Analyze audio and write to files - Get training, validating, and testing data
-    if (run_opt in [1, 4]): logging.info("Preparing training, validating, and testing data...")
+    if (args.run_opt in [1, 4]): logging.info("Preparing training, validating, and testing data...")
     list_of_train_data, valid_data, test_data, values, val_indices, indices_val = \
-        getModelData(sp, songs, media_output_dir, fs, hop, run_opt)
+        getModelData(sp, songs, media_output_dir, fs, hop, args.run_opt)
 
     # Train model
-    if run_opt in [2, 4]:
+    if args.run_opt in [2, 4]:
         
         # Build model
         logging.info("Building model...")
@@ -93,7 +93,7 @@ def main(run_opt):
         generatePlots(histories, songs, stat_output_dir)
 
     # Generate new audio
-    if run_opt in [3, 4]:
+    if args.run_opt in [3, 4]:
 
         # Load the latest model; TODO load the *best* model
         logging.info("Loading best model...")
@@ -126,6 +126,7 @@ if __name__ == "__main__":
     arg_help = "An integer: 1 to analyze audio, 2 to train, 3 to generate, 4 to do everything."
     parser = argparse.ArgumentParser()
     parser.add_argument('run_opt', type=int, default=4, help=arg_help)
+    parser.add_argument('uri', type=str, help="A string: spotify playlist uri")
     args = parser.parse_args()
 
-    main(args.run_opt)
+    main(args)
