@@ -12,19 +12,20 @@ from __future__ import print_function
 import logging, argparse, os
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 from keras.models import load_model
+from keras.callbacks import ModelCheckpoint, TensorBoard
 from music21 import stream, tempo, midi
 
 from spotify import authenticateSpotify, getSpotifyData
 from model_data import getModelData, KerasBatchGenerator
 from lstm import createModel
-from generate import generate
+from generate import generate, generatePlots
 from midiparse import interpretGrammar
 from melosynth import midiwrite
 
 def main(run_opt):
 
     # Define model parameters
-    n_epochs = 100
+    n_epochs = 150
     n_songs = 6 # >= 3 ; train:validate:test = (n-2):1:1; last song will be test
     n_steps = 5 # number of timesteps in memory
     batch_size = 2
@@ -42,15 +43,15 @@ def main(run_opt):
 
     media_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/melodia"
     model_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/model"
+    stat_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/stat"
     newsynth_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/new_synth"
-    newsynth_f = "yellow_mellow.mid"
     key_f = "/Users/alexkim/Dropbox/Developer/ML/music/keys.cfg"
-    spot_uri = "spotify:user:alezabeth1997:playlist:0grIqJ1svhAl7Lv9CIcKb6"
+    spot_uri = "spotify:user:alezabeth1997:playlist:0BLcVU3U6X2QkhxcYl2Ai1"
 
     # Get Spotify songs
     logging.info("Getting songs...")
     sp = authenticateSpotify(key_f)
-    songs = getSpotifyData(sp, spot_uri, n_songs)
+    songs, playlist_name = getSpotifyData(sp, spot_uri, n_songs)
 
     ## An integer: 1 to analyze audio, 2 to train, 3 to generate, 4 to do everything.
     
@@ -64,7 +65,7 @@ def main(run_opt):
         
         # Build model
         logging.info("Building model...")
-        model, checkpointer = createModel(len(values), n_steps, hidden_size, use_dropout, model_output_dir)
+        model = createModel(len(values), n_steps, hidden_size, use_dropout)
         # print(model.summary())
 
         # Prepare batch generators and train
@@ -72,21 +73,31 @@ def main(run_opt):
         valid_data_generator = KerasBatchGenerator(valid_data, val_indices, n_steps, batch_size, len(values), skip_step=skip_step)
         #test_data_generator = KerasBatchGenerator(valid_data, n_steps, batch_size(valid_data), len(values), skip_step=skip_step)
 
+        histories = []
+
         for i, train_data in enumerate(list_of_train_data):
-            # Generate train data
+            # Generate train data and checkpointer
             train_data_generator = KerasBatchGenerator(train_data, val_indices, n_steps, batch_size, len(values), skip_step=skip_step)
+            hdf5_f = "%s/model-d%02d-e{epoch:02d}.hdf5" % (model_output_dir, i + 1)
+            checkpointer = ModelCheckpoint(filepath=hdf5_f, monitor='val_acc', save_best_only=False, verbose=0)
+            tbCallBack = TensorBoard(log_dir=stat_output_dir, histogram_freq=0, write_graph=True, write_images=True)
             # Train model
-            logging.info("Training model[%d/%d]..." % (i, len(list_of_train_data)))
-            model.fit_generator(train_data_generator.generate(), len(train_data)//(batch_size*n_steps), n_epochs,
+            logging.info("Training model [%d/%d]..." % (i + 1, len(list_of_train_data)))
+            history = model.fit_generator(train_data_generator.generate(), len(train_data)//(batch_size*n_steps), n_epochs,
                                 validation_data=valid_data_generator.generate(),
-                                validation_steps=len(valid_data)//(batch_size*n_steps), callbacks=[checkpointer])
+                                validation_steps=len(valid_data)//(batch_size*n_steps), callbacks=[checkpointer, tbCallBack],
+                                verbose=0)
+            histories.append(history)
+
+        logging.info("Plotting model statistics...")
+        generatePlots(histories, songs, stat_output_dir)
 
     # Generate new audio
     if run_opt in [3, 4]:
 
         # Load the latest model; TODO load the *best* model
         logging.info("Loading best model...")
-        model = load_model("%s/model-%d.hdf5" % (model_output_dir, n_epochs))
+        model = load_model("%s/model-d%02d-e%02d.hdf5" % (model_output_dir, len(list_of_train_data), n_epochs))
         dummy_iters = n_epochs
         example_test_generator = KerasBatchGenerator(test_data, val_indices, n_steps, batch_size, len(values), skip_step=skip_step)
 
@@ -106,7 +117,7 @@ def main(run_opt):
         true_notes = interpretGrammar(true_grammars)
         predicted_notes = interpretGrammar(predicted_grammars)
         
-        newsynth_fo = os.path.join(newsynth_output_dir, newsynth_f)
+        newsynth_fo = os.path.join(newsynth_output_dir, playlist_name + ".mid")
         midiwrite(newsynth_fo, predicted_notes, test_bpm)
 
 

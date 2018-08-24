@@ -39,7 +39,8 @@ def getSpotifyData(sp, uri, n_songs):
     username = uri.split(':')[2]
     playlist_id = uri.split(':')[4]
     results = sp.user_playlist(username, playlist_id) # doesn't work if not user playlist
+    playlist_name = ''.join(e for e in results['name'] if e.isalnum())
     songs = results['tracks']['items']
 
-    return(songs[:n_songs])
+    return(songs[:n_songs], playlist_name)
 
