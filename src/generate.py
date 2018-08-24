@@ -59,3 +59,15 @@ def generatePlots(histories, songs, output_dir):
     plt.legend(song_names, loc='upper left')
     plt.savefig(os.path.join(output_dir, 'loss.png'), bbox_inches='tight')
     plt.clf()
+
+def generateDirs(media_dir, model_dir, stat_dir, sub_dir_name):
+
+    med = os.path.join(media_dir, sub_dir_name)
+    mod = os.path.join(model_dir, sub_dir_name)
+    sd = os.path.join(stat_dir, sub_dir_name)
+
+    for d in [med, mod, sd]:
+        if not os.path.exists(d):
+            os.makedirs(d)
+    
+    return (med, mod, sd)

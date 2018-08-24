@@ -18,14 +18,14 @@ from music21 import stream, tempo, midi
 from spotify import authenticateSpotify, getSpotifyData
 from model_data import getModelData, KerasBatchGenerator
 from lstm import createModel
-from generate import generate, generatePlots
+from generate import generate, generatePlots, generateDirs
 from midiparse import interpretGrammar
 from melosynth import midiwrite
 
 def main(args):
 
     # Define model parameters
-    n_epochs = 150
+    n_epochs = 80
     n_songs = 10 # >= 3 ; train:validate:test = (n-2):1:1; last song will be test
     n_steps = 5 # number of timesteps in memory
     batch_size = 2
@@ -41,17 +41,23 @@ def main(args):
     fs = 44100
     hop = 128 
 
-    media_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/melodia"
-    model_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/model"
-    stat_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/stat"
-    newsynth_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/new_synth"
-    key_f = "/Users/alexkim/Dropbox/Developer/ML/music/keys.cfg"
     spot_uri = args.uri # spotify:user:alezabeth1997:playlist:0BLcVU3U6X2QkhxcYl2Ai1
+    key_f = "/Users/alexkim/Dropbox/Developer/ML/music/keys.cfg"
 
     # Get Spotify songs
     logging.info("Getting songs...")
     sp = authenticateSpotify(key_f)
     songs, playlist_name = getSpotifyData(sp, spot_uri, n_songs)
+
+    # Create SubDirectories and Files
+    _media_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/melodia"
+    _model_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/model"
+    _stat_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/stat"
+    newsynth_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/new_synth"
+    
+    logging.info("Creating subdirectories for this run...")
+    media_output_dir, model_output_dir, stat_output_dir = \
+        generateDirs(_media_output_dir, _model_output_dir, _stat_output_dir, playlist_name)
 
     ## An integer: 1 to analyze audio, 2 to train, 3 to generate, 4 to do everything.
     

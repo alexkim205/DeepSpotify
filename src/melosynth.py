@@ -291,18 +291,23 @@ def melosynth(times, freqs, bpm, orig_url, outputfolder, outputid,
         Save synthesized melody to .midi.
     '''
 
-    logging.info('Saving csv file...')
+    logging.info('Saving audio files...')
+
     # music/data/melodia/data
     csv_data = np.array([times, freqs]).T
-    csv_f = os.path.join(outputfolder, "data", outputid + ".csv")
+    csv_f_dir = os.path.join(outputfolder, "data")
+    if not os.path.exists(csv_f_dir):
+        os.makedirs(csv_f_dir)
+    csv_f = os.path.join(csv_f_dir, outputid + ".csv")
     np.savetxt(csv_f, csv_data, delimiter=",")
     
-    logging.info('Saving wav file...')
     # music/data/melodia/synths
-    wav_f = os.path.join(outputfolder, "synths", outputid + ".melo.wav")
+    wav_f_dir = os.path.join(outputfolder, "synths")
+    if not os.path.exists(wav_f_dir):
+        os.makedirs(wav_f_dir)
+    wav_f = os.path.join(wav_f_dir, outputid + ".melo.wav")
     wavwrite(np.asarray(signal), wav_f, fs)
     
-    logging.info('Saving mixed wav file...')
     # music/data/melodia/synths
     wav_mix_f = os.path.join(outputfolder, "synths", outputid + ".melo.and.orig.wav")
     
@@ -312,12 +317,10 @@ def melosynth(times, freqs, bpm, orig_url, outputfolder, outputid,
     orig_and_melo = np.add(orig*0.3, melo*0.7)
     wavwrite(orig_and_melo, wav_mix_f, fs)
     
-    logging.info('Saving original wav file...')
     # music/data/melodia/synths
     wav_orig_f = os.path.join(outputfolder, "synths", outputid + ".orig.wav")
     wavwrite(orig, wav_orig_f, fs)
     
-    logging.info('Saving midi file...')
     # music/data/melodia/synths
     midi_f = os.path.join(outputfolder, "synths", outputid + ".melo.midi")
     midiwrite(midi_f, notes, bpm)
