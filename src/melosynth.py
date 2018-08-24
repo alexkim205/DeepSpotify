@@ -74,7 +74,7 @@ def midiwrite(outfile, notes, tempo):
         onset = note[0] * (tempo/60.)
         duration = note[1] * (tempo/60.)
         # duration = 1
-        pitch = note[2].astype(int)
+        pitch = note[2]
         midifile.addNote(track, channel, pitch, onset, duration, volume)
 
     # And write it to disk.
@@ -118,7 +118,7 @@ def midi_to_notes(midi, fs=44100, hop=128, smooth=0.25, minduration=0.1):
             # start new note
             onset = n
             duration = 1
-            p_prev = p
+            p_prev = p.astype(int)
 
     # add last note
     if p_prev > 0:

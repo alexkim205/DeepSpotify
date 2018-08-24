@@ -19,11 +19,12 @@ from model_data import getModelData, KerasBatchGenerator
 from lstm import createModel
 from generate import generate
 from midiparse import interpretGrammar
+from melosynth import midiwrite
 
 def main(run_opt):
 
     # Define model parameters
-    n_epochs = 80
+    n_epochs = 100
     n_songs = 6 # >= 3 ; train:validate:test = (n-2):1:1; last song will be test
     n_steps = 5 # number of timesteps in memory
     batch_size = 2
@@ -33,7 +34,7 @@ def main(run_opt):
 
     # Define generate parameters
     # TODO - n_batch_prime = 1 # number of batches in test data to begin predicting with
-    n_predict = 500
+    n_predict = 200
 
     # Define analysis parameters
     fs = 44100
@@ -42,9 +43,9 @@ def main(run_opt):
     media_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/melodia"
     model_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/model"
     newsynth_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/new_synth"
-    newsynth_f = "Queen.mid"
+    newsynth_f = "yellow_mellow.mid"
     key_f = "/Users/alexkim/Dropbox/Developer/ML/music/keys.cfg"
-    spot_uri = "spotify:user:jeraldpgambino:playlist:6RzO3F2uNKdbRif0Fxo8Fn"
+    spot_uri = "spotify:user:alezabeth1997:playlist:0grIqJ1svhAl7Lv9CIcKb6"
 
     # Get Spotify songs
     logging.info("Getting songs...")
@@ -97,35 +98,16 @@ def main(run_opt):
         # Get bpm for the one test song
         test_bpm = sp.audio_analysis(songs[-1]['track']['uri'].split(':')[2])['track']['tempo']
         
-        print(true_grammars)
-        print(predicted_grammars)
+        # print(true_grammars)
+        # print(predicted_grammars)
 
         # Set up audio stream
         logging.info("Writing generated melody to MIDI...")
-        true_stream = stream.Stream()
-        predicted_stream = stream.Stream()
-
-        true_stream.insert(0.0, tempo.MetronomeMark(number=test_bpm))
-        predicted_stream.insert(0.0, tempo.MetronomeMark(number=test_bpm))
-
-        curr_offset = 0
-        for g in true_grammars:
-            duration, element = interpretGrammar(g)
-            true_stream.insert(curr_offset, element)
-            curr_offset += duration
-
-        curr_offset = 0
-        for g in predicted_grammars:
-            duration, element = interpretGrammar(g)
-            predicted_stream.insert(curr_offset, element)
-            curr_offset += duration
+        true_notes = interpretGrammar(true_grammars)
+        predicted_notes = interpretGrammar(predicted_grammars)
         
-        # Save stream
-        mf = midi.translate.streamToMidiFile(predicted_stream)
         newsynth_fo = os.path.join(newsynth_output_dir, newsynth_f)
-        mf.open(newsynth_fo, 'wb')
-        mf.write()
-        mf.close()
+        midiwrite(newsynth_fo, predicted_notes, test_bpm)
 
 
 if __name__ == "__main__":
