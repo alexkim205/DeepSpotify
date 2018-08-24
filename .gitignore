@@ -4,5 +4,6 @@ notebooks/.ipynb_checkpoints
 data/melodia
 data/model
 data/new_synth
+data/stat
 .vscode
 music.code-workspace
