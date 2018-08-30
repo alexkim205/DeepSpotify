@@ -26,7 +26,7 @@ def main(args):
 
     # Define model parameters
     n_epochs = 80
-    n_songs = 10 # >= 3 ; train:validate:test = (n-2):1:1; last song will be test
+    n_songs = 6 # >= 3 ; train:validate:test = (n-2):1:1; last song will be test
     n_steps = 5 # number of timesteps in memory
     batch_size = 2
     skip_step = 1

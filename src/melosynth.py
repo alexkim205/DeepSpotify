@@ -63,7 +63,7 @@ def midiwrite(outfile, notes, tempo):
     midifile = MIDIFile(1) # Just one track for now
     channel = 0
     volume = 100
-    program = 54 # Synth Voice
+    program = 1 # Bright piano
     
     # Add track name and tempo.
     midifile.addTrackName(track, time, "Synth Track")
