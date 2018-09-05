@@ -5,8 +5,10 @@ data/melodia
 data/model
 data/new_synth
 data/stat
+data/sf2
 .vscode
 music.code-workspace
 music.yaml
 Dockerfile
 requirements.txt
+conf

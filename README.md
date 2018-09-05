@@ -62,12 +62,40 @@ The `run_opt` is used to run different parts of the program. Keep in mind that (
 
 The `uri` is the Spotify playlist URI. This should in a format like this `spotify:user:alezabeth1997:playlist:1LMwOJtfhsnN2FGf0yizXl` (an example of my personal Snarky Puppy playlist).
 
+## Where can I find my new music?
+
+After a complete run of DeepSpotify, the project directory will look like this:
+
+```
+- data/
+  - melodia/
+    - {playlist_name}/
+      - data/
+      - synth/
+  - model/
+    - {playlist_name}/
+  - new_synth/
+  - stat/
+    - {playlist_name}/
+```
+
+`data/melodia/{playlist_name}/data/` - timestamp + frequency csv melody data will be placed here.
+
+`data/melodia/{playlist_name}/synth/` - for each song, you'll find a:
+  - `{song}.orig.wav` (a wav of 30s Spotify preview), 
+  - `{song}.melo.and.orig.wav` (a wav of extracted melody superimposed on original preview), and a 
+  - `{song}.melo.midi` (midi interpretation of extracted melody).
+
+`data/model/{playlist_name}/` - after each epoch for each song the model is trained on will be saved in the format `model-dX-eX.hdf5`.
+
+`new_synth/` - generated song called `{playlist_name}.mid` will be placed here.
+
+`stat/` - statistical summaries of model training; includes Tensorflow events to be opened with Tensorboard.
+
 ## Quality Control
 
 Because all music is not equal, the quality of the generated songs may differ greatly. This is probably attributed to how Melodia can extract the melodic frequencies better from some songs than for other songs (i.e., cleaner melody in a jazz piece than an Eminem rap). 
 
 ## Future Work
 
-Feel free to fork this project! I'll be making improvements to this project (i.e., considering using raw melodies instead of midi files because midi doesn't seem to capture melody accurately, feeding in model data differently, etc.).
-
-Follow my progress on my [blog](alexisafk.com).
+Feel free to fork this project! I'll be making improvements to this project (i.e., considering using raw melodies instead of midi files because midi doesn't seem to capture melody accurately, feeding in model data differently, etc.). Follow my progress on my [blog](alexisafk.com)!
