@@ -1,0 +1,33 @@
+name: DeepSpotify
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - ca-certificates=2018.03.07=0
+  - certifi=2018.8.24=py36_1
+  - libcxx=4.0.1=h579ed51_0
+  - libcxxabi=4.0.1=hebd6815_0
+  - libedit=3.1.20170329=hb402a30_2
+  - libffi=3.2.1=h475c297_4
+  - ncurses=6.1=h0a44026_0
+  - openssl=1.0.2p=h1de35cc_0
+  - pip=10.0.1=py36_0
+  - python=3.6.6=hc167b69_0
+  - readline=7.0=h1de35cc_5
+  - setuptools=40.2.0=py36_0
+  - sqlite=3.24.0=ha441bb4_0
+  - tk=8.6.8=ha441bb4_0
+  - wheel=0.31.1=py36_0
+  - xz=5.2.4=h1de35cc_4
+  - zlib=1.2.11=hf3cbc9b_2
+  - pip:
+    - tensorflow==1.10.0
+    - Keras==2.2.2
+    - spotipy==2.4.4
+    - vamp==1.1.0
+    - librosa==0.6.2
+    - music21==5.3.0
+    - MIDIUtil==1.2.1
+    - matplotlib==2.2.3
+prefix: /anaconda3/envs/DeepSpotify
+

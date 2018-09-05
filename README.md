@@ -1,6 +1,6 @@
-# DeepSpotify
+![](github/logo.png)
 
-
+---
 
 Congratulations! You have just found DeepSpotify.
 
