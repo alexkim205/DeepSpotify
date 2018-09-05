@@ -16,7 +16,7 @@ Make sure to have Anaconda and Melodia installed. See further down for instructi
 
 Then create an Anaconda environment from the `DeepSpotify.yaml` in the project root directory by running:
 
-```bash
+```{bash}
 $ conda env create -f DeepSpotify.yml
 $ source activate DeepSpotify
 ```
@@ -43,7 +43,7 @@ Manually install all these dependencies in Python 3.6 environment:
 
 `main.py` is run by passing two parameters:
 
-```bash
+```{bash}
 $ python src/main.py -h
 Using TensorFlow backend.
 usage: main.py [-h] run_opt uri
