@@ -11,4 +11,5 @@ music.code-workspace
 music.yaml
 Dockerfile
 requirements.txt
-conf
+conf/
+Makefile

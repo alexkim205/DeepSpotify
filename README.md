@@ -2,7 +2,7 @@
 
 ---
 
-Congratulations! You have just found DeepSpotify.
+Congratulations! You have just found **DeepSpotify**.
 
 DeepSpotify learns your favorite Spotify playlists to generate music. It uses [Melodia](https://www.upf.edu/web/mtg/melodia) and [spotipy](https://github.com/plamere/spotipy)/[Spotify Web API](https://developer.spotify.com/web-api/) to extract a melody from your favorite Spotify playlist, [Keras](https://keras.io/) to learn the grammars of these melodies with a two layer [LSTM](https://colah.github.io/posts/2015-08-Understanding-LSTMs/) [RNN](https://karpathy.github.io/2015/05/21/rnn-effectiveness/), and generates a new melody that should sound like the other songs in that playlist.
 
@@ -27,7 +27,7 @@ P.S. Detailed instructions on how to install Melodia 1.0 are [here](https://www.
 
 ### The Hard Way
 
-Manually install all these dependencies in Python 3.6 environment:
+Manually install all these dependencies (and their dependencies) in a Python 3.6 environment:
 
 * [tensorflow](https://www.tensorflow.org/install/)=1.10.0
 * [Keras](https://keras.io/)==2.2.2
@@ -94,7 +94,7 @@ After a complete run of DeepSpotify, the project directory will look like this:
 
 ## Quality Control
 
-Because all music is not equal, the quality of the generated songs may differ greatly. This is probably attributed to how Melodia can extract the melodic frequencies better from some songs than for other songs (i.e., cleaner melody in a jazz piece than an Eminem rap). 
+Because all music is not equal, the quality of the generated songs may vastly differ. This is probably attributed to how Melodia can extract the melodic frequencies better from some songs than for other songs (i.e., cleaner melody in a jazz piece than an Eminem rap). 
 
 ## Future Work
 
