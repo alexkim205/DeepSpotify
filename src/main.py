@@ -50,14 +50,14 @@ def main(args):
     songs, playlist_name = getSpotifyData(sp, spot_uri, n_songs)
 
     # Create SubDirectories and Files
-    _media_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/melodia"
-    _model_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/model"
-    _stat_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/stat"
-    newsynth_output_dir = "/Users/alexkim/Dropbox/Developer/ML/music/data/new_synth"
+    _media_output_dir = "data/melodia"
+    _model_output_dir = "data/model"
+    _stat_output_dir = "data/stat"
+    _newsynth_output_dir = "data/new_synth"
     
     logging.info("Creating subdirectories for this run...")
     media_output_dir, model_output_dir, stat_output_dir = \
-        generateDirs(_media_output_dir, _model_output_dir, _stat_output_dir, playlist_name)
+        generateDirs(_media_output_dir, _model_output_dir, _stat_output_dir, _newsynth_output_dir, playlist_name)
 
     ## An integer: 1 to analyze audio, 2 to train, 3 to generate, 4 to do everything.
     
@@ -123,7 +123,7 @@ def main(args):
         true_notes = interpretGrammar(true_grammars)
         predicted_notes = interpretGrammar(predicted_grammars)
         
-        newsynth_fo = os.path.join(newsynth_output_dir, playlist_name + ".mid")
+        newsynth_fo = os.path.join(_newsynth_output_dir, playlist_name + ".mid")
         midiwrite(newsynth_fo, predicted_notes, test_bpm)
 
 
