@@ -7,3 +7,5 @@ data/new_synth
 data/stat
 .vscode
 music.code-workspace
+music.yaml
+Dockerfile
