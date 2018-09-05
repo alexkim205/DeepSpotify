@@ -6,7 +6,7 @@ Congratulations! You have just found **DeepSpotify**.
 
 DeepSpotify learns your favorite Spotify playlists to generate music. It uses [Melodia](https://www.upf.edu/web/mtg/melodia) and [spotipy](https://github.com/plamere/spotipy)/[Spotify Web API](https://developer.spotify.com/web-api/) to extract a melody from your favorite Spotify playlist, [Keras](https://keras.io/) to learn the grammars of these melodies with a two layer [LSTM](https://colah.github.io/posts/2015-08-Understanding-LSTMs/) [RNN](https://karpathy.github.io/2015/05/21/rnn-effectiveness/), and generates a new melody that should sound like the other songs in that playlist.
 
-Follow my progress on this project on my blog, [alexisafk.com](http://alexisafk.com).
+Follow my progress on this project on my blog, [alexisafk.com](https://alexisafk.com).
 
 ## Dependencies
 
@@ -98,4 +98,4 @@ Because all music is not equal, the quality of the generated songs may vastly di
 
 ## Future Work
 
-Feel free to fork this project! I'll be making improvements to this project (i.e., considering using raw melodies instead of midi files because midi doesn't seem to capture melody accurately, feeding in model data differently, etc.). Follow my progress on my [blog](http://alexisafk.com)!
+Feel free to fork this project! I'll be making improvements to this project (i.e., considering using raw melodies instead of midi files because midi doesn't seem to capture melody accurately, feeding in model data differently, etc.). Follow my progress on my [blog](https://alexisafk.com)!
